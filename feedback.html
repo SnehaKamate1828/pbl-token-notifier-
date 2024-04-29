@@ -61,7 +61,7 @@
     </style>
 </head>
 <body>
-    <form id="feedbackForm" name="myform" action="http://127.0.0.1:5500/PBL-main/feedbackcomp.html" method="POST">
+    <form id="feedbackForm" name="myform" action="feedbackcomp.html" method="POST">
         <h1>FEEDBACK FORM</h1>
         <table>
             <tr>
@@ -120,6 +120,9 @@
             if (fname === "" || lname === "" || email === "" || service === "---Select---" || rating === "" || comments === "") {
                 alert("Fill the feedback form first");
                 event.preventDefault(); // Prevent form submission
+            } else {
+                // If all fields are filled, the form is submitted to "feedbackcomp.html"
+                // You can also add additional processing here if needed
             }
         });
     </script>

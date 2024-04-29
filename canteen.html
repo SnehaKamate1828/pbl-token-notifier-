@@ -65,12 +65,13 @@
             </tbody>
         </table>
         <button onclick="addRow()">Take Order</button>
+        <button onclick="submitData()">Submit</button>
     </div>
 
     <script>
         var tokenCount = {
-            '1': 0,
-            '2': 0
+            '1': false,
+            '2': false
         };
 
         // Load saved data from localStorage when the page loads
@@ -83,8 +84,8 @@
                     var newRow = table.insertRow();
                     newRow.innerHTML = `
                         <td>${rowData.srNo}</td>
-                        <td><input type='text' placeholder='Order ID' value='${rowData.OrderID}'></td>
-                        <td><input type='text' placeholder='Food Name' value='${rowData.FoodName}'></td>
+                        <td><input type='text' placeholder='Order ID' value='${rowData.orderID}'></td>
+                        <td><input type='text' placeholder='Food Name' value='${rowData.foodName}'></td>
                         <td><select><option value='1'>1</option><option value='2'>2</option></select></td>
                         <td><button onclick='buzz(this)'>Buzz</button></td>
                         <td><button onclick='removeRow(this)'>Remove</button></td>
@@ -106,7 +107,7 @@
             var cell5 = newRow.insertCell(4);
             var cell6 = newRow.insertCell(5);
             cell1.innerHTML = table.rows.length;
-            cell2.innerHTML = "<input type='text' placeholder='Order Id'>";
+            cell2.innerHTML = "<input type='text' placeholder='Order ID'>";
             cell3.innerHTML = "<input type='text' placeholder='Food Name'>";
             cell4.innerHTML = "<select><option value='1'>1</option><option value='2'>2</option></select>";
             cell5.innerHTML = "<button onclick='buzz(this)'>Buzz</button>";
@@ -120,7 +121,22 @@
         function removeRow(button) {
             var row = button.parentNode.parentNode;
             var token = row.cells[3].querySelector('select').value;
-            tokenCount[token] = 0;
+            tokenCount[token] = false;
+
+            // Store the removed row data in localStorage
+            var removedData = {
+                srNo: row.cells[0].innerText,
+                orderID: row.cells[1].querySelector('input').value,
+                foodName: row.cells[2].querySelector('input').value,
+                tokenNo: token,
+                tokenCount: tokenCount[token]
+            };
+
+            var removedRows = JSON.parse(localStorage.getItem('removedRows')) || [];
+            removedRows.push(removedData);
+            localStorage.setItem('removedRows', JSON.stringify(removedRows));
+
+            // Remove the row from the table
             row.parentNode.removeChild(row);
 
             // Save table data to localStorage
@@ -134,8 +150,8 @@
             for (var i = 0; i < table.rows.length; i++) {
                 var rowData = {
                     srNo: table.rows[i].cells[0].innerText,
-                    OrderID: table.rows[i].cells[1].querySelector('input').value,
-                    FoodName: table.rows[i].cells[2].querySelector('input').value,
+                    orderID: table.rows[i].cells[1].querySelector('input').value,
+                    foodName: table.rows[i].cells[2].querySelector('input').value,
                     tokenNo: table.rows[i].cells[3].querySelector('select').value,
                     tokenCount: tokenCount[table.rows[i].cells[3].querySelector('select').value]
                 };
@@ -144,12 +160,22 @@
             localStorage.setItem('tableData', JSON.stringify(rowDataArray));
         }
 
+        // Function to submit data and redirect to removedata1.html
+        function submitData() {
+            // Save table data before redirecting
+            saveTableData();
+            // Redirect to removedata1.html
+            window.location.href = "removedata1.html";
+        }
+
         // Function to buzz
         function buzz(button) {
             var row = button.parentNode.parentNode;
             var token = row.cells[3].querySelector('select').value;
 
             tokenCount[token]++;
+            saveTableData(); // Save table data before redirecting
+
             if (token === '1') {
                 window.location.href = "https://blynk.cloud/dashboard/273673/global/devices/2066805/organization/273673/devices/1014614/dashboard";
             } else if (token === '2') {

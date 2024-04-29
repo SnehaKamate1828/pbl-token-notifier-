@@ -65,6 +65,7 @@
             </tbody>
         </table>
         <button onclick="addRow()">Take Service</button>
+        <button onclick="submitData()">Submit</button>
     </div>
 
     <script>
@@ -74,12 +75,12 @@
         };
 
         // Load saved data from localStorage when the page loads
-        window.onload = function() {
+        window.onload = function () {
             var savedData = JSON.parse(localStorage.getItem('tableData'));
             if (savedData) {
                 var table = document.getElementById("orderTable").getElementsByTagName('tbody')[0];
                 table.innerHTML = ""; // Clear existing rows
-                savedData.forEach(function(rowData) {
+                savedData.forEach(function (rowData) {
                     var newRow = table.insertRow();
                     newRow.innerHTML = `
                         <td>${rowData.srNo}</td>
@@ -116,11 +117,26 @@
             saveTableData();
         }
 
-        // Function to remove a row from the table
-        function removeRow(button) {
+         // Function to remove a row from the table
+         function removeRow(button) {
             var row = button.parentNode.parentNode;
             var token = row.cells[3].querySelector('select').value;
-            tokenCount[token] = 0;
+            tokenCount[token] = false;
+
+            // Store the removed row data in localStorage
+            var removedData = {
+                srNo: row.cells[0].innerText,
+                CustomerName: row.cells[1].querySelector('input').value,
+                ServiceName: row.cells[2].querySelector('input').value,
+                tokenNo: token,
+                tokenCount: tokenCount[token]
+            };
+
+            var removedRows = JSON.parse(localStorage.getItem('removedRows')) || [];
+            removedRows.push(removedData);
+            localStorage.setItem('removedRows', JSON.stringify(removedRows));
+
+            // Remove the row from the table
             row.parentNode.removeChild(row);
 
             // Save table data to localStorage
@@ -144,12 +160,29 @@
             localStorage.setItem('tableData', JSON.stringify(rowDataArray));
         }
 
+        // Function to submit data and redirect to removedata3.html
+        function submitData() {
+            // Save table data before redirecting
+            saveTableData();
+
+            // Redirect to removedata3.html
+            window.location.href = "removedata3.html";
+        }
+
         // Function to buzz
         function buzz(button) {
             var row = button.parentNode.parentNode;
             var token = row.cells[3].querySelector('select').value;
 
             tokenCount[token]++;
+            saveTableData(); // Save table data before redirecting
+
+            // Redirect after data is saved
+            redirectToDashboard(token);
+        }
+
+        // Function to redirect to dashboard based on token
+        function redirectToDashboard(token) {
             if (token === '1') {
                 window.location.href = "https://blynk.cloud/dashboard/273673/global/devices/2066805/organization/273673/devices/1014614/dashboard";
             } else if (token === '2') {
